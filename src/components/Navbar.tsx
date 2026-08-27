@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   BookOpen, 
   Atom, 
@@ -56,6 +57,11 @@ export default function Navbar({
   const [themeMode, setThemeMode] = useState<'dark' | 'parchment'>('dark');
   const [selectedLang, setSelectedLang] = useState<'hi' | 'sa' | 'en'>('hi');
   const [isSavedAlert, setIsSavedAlert] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleHeaderAudio = () => {
     if (isPlaying) {
@@ -76,6 +82,17 @@ export default function Navbar({
   useEffect(() => {
     setTempKey(apiKey);
   }, [apiKey]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSettingsOpen) {
+        setIsSettingsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSettingsOpen]);
 
   const navItems: { id: NavTab; label: string; hindiLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'gyan-kosh', label: 'Knowledge Base', hindiLabel: 'ज्ञान कोष', icon: BookOpen },
@@ -260,18 +277,18 @@ export default function Navbar({
         </div>
       )}
 
-      {/* FULLY SCREEN-CENTERED SETTINGS MODAL DIALOG WITH BACKDROP */}
-      {isSettingsOpen && (
+      {/* FULLY SCREEN-CENTERED SETTINGS MODAL DIALOG WITH PORTAL & HIGHEST Z-INDEX */}
+      {mounted && isSettingsOpen && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto"
           onClick={() => setIsSettingsOpen(false)}
         >
           <div 
-            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-amber-500/30 bg-[#1a120b] text-amber-100 p-6 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200"
+            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-amber-500/40 bg-[#120d08] text-amber-100 p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] z-[10000] my-auto animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             
-            {/* Header: ⚙️ सिस्टम व AI सेटिंग्स with Clear Close Button */}
+            {/* Header with Title and Close Button */}
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20 mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-[#7c1a1a] text-[#f59e0b] border border-amber-500/30 shadow-md">
@@ -387,7 +404,7 @@ export default function Navbar({
                 </div>
               </div>
 
-              {/* 4. Custom Gemini API Key */}
+              {/* 4. Form / Custom Gemini API Key Controls */}
               <div>
                 <label className="block text-xs font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
                   <Key className="w-4 h-4" />
@@ -438,7 +455,8 @@ export default function Navbar({
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </header>

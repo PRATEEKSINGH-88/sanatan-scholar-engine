@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   pioneersMatrixData, 
   PioneerProfile 
@@ -24,6 +25,11 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
   const { playMantra, isPlaying, title } = useVedicAudio();
   const [selectedPioneer, setSelectedPioneer] = useState<PioneerProfile | null>(null);
   const [selectedTag, setSelectedTag] = useState<string>('all');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -197,10 +203,16 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
         })}
       </div>
 
-      {/* Deep Pioneer Dossier Modal (Fixed clipping with z-[60] and clean scroll) */}
-      {selectedPioneer && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-6">
+      {/* Deep Pioneer Dossier Modal Rendered via Portal at Body Level with highest z-index */}
+      {mounted && selectedPioneer && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+          onClick={() => setSelectedPioneer(null)}
+        >
+          <div 
+            className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-[0_0_50px_rgba(0,0,0,0.9)] z-[10000] space-y-6 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedPioneer(null)}
               className="absolute top-5 right-5 p-2 rounded-full bg-[#1c0e08] text-[#d4a359] hover:text-white border border-[#d4a359]/30"
@@ -313,7 +325,8 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </section>

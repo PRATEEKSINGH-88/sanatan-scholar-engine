@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   scripturesData, 
   ScriptureItem 
@@ -26,6 +27,11 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedScripture, setSelectedScripture] = useState<ScriptureItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const categories = [
     { id: 'all', label: 'समस्त ग्रन्थ (All Scriptures)' },
@@ -256,10 +262,16 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
         </div>
       )}
 
-      {/* Deep Scripture Modal */}
-      {selectedScripture && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-5">
+      {/* Deep Scripture Modal Rendered via Portal at Body Level */}
+      {mounted && selectedScripture && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+          onClick={() => setSelectedScripture(null)}
+        >
+          <div 
+            className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-[0_0_50px_rgba(0,0,0,0.9)] z-[10000] space-y-5 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedScripture(null)}
               className="absolute top-5 right-5 p-2 rounded-full bg-[#1c0e08] text-[#d4a359] hover:text-white border border-[#d4a359]/30"
@@ -342,7 +354,8 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </section>
