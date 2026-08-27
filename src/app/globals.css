@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Serif+Devanagari:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-cinzel: 'Cinzel', serif;
+  --font-devanagari: 'Noto Serif Devanagari', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  /* Vedic Saffron & Crimson Ochre */
+  --vedic-saffron-900: #4a0d0d;
+  --vedic-saffron-800: #7c1a1a;
+  --vedic-saffron-700: #991b1b;
+  --vedic-saffron-600: #a33b12;
+  --vedic-saffron-500: #d9531e;
+  --vedic-saffron-400: #ea580c;
+  
+  /* Parchment Gold & Warm Cream */
+  --parchment-gold-900: #5c4314;
+  --parchment-gold-700: #966f22;
+  --parchment-gold-500: #d4a359;
+  --parchment-gold-400: #e2b975;
+  --parchment-gold-300: #f4d59a;
+  --parchment-gold-100: #fef8ec;
+  --parchment-bg-light: #fdfbf7;
+  
+  /* Deep Cosmic Void Dark Theme */
+  --cosmic-bg-deep: #080402;
+  --cosmic-bg-surface: #120905;
+  --cosmic-bg-card: #1c0e08;
+  --cosmic-bg-card-hover: #26130b;
+  --cosmic-border-gold: rgba(212, 163, 89, 0.22);
+  --cosmic-border-gold-bright: rgba(212, 163, 89, 0.45);
+}
+
+@layer base {
+  * {
+    border-color: var(--cosmic-border-gold);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--cosmic-bg-deep);
+    color: #f3ede2;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Typography Utility Classes */
+.font-cinzel {
+  font-family: var(--font-cinzel);
+}
+
+.font-devanagari {
+  font-family: var(--font-devanagari);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Vedic Glow & Golden Shimmer Effects */
+.vedic-gold-gradient {
+  background: linear-gradient(135deg, #fce0a2 0%, #d4a359 50%, #966f22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vedic-crimson-gradient {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 50%, #7c1a1a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vedic-saffron-badge {
+  background: linear-gradient(135deg, rgba(163, 59, 18, 0.25) 0%, rgba(124, 26, 26, 0.35) 100%);
+  border: 1px solid rgba(212, 163, 89, 0.3);
+  color: #fce0a2;
+}
+
+.parchment-glass-card {
+  background: radial-gradient(circle at top left, rgba(38, 19, 11, 0.85), rgba(18, 9, 5, 0.95));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 163, 89, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(254, 240, 199, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.parchment-glass-card:hover {
+  border-color: rgba(212, 163, 89, 0.45);
+  box-shadow: 0 12px 40px 0 rgba(163, 59, 18, 0.2), inset 0 1px 0 0 rgba(254, 240, 199, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Shloka Container with Golden Margin Rules */
+.shloka-box {
+  background: linear-gradient(180deg, rgba(46, 20, 12, 0.7) 0%, rgba(24, 11, 6, 0.85) 100%);
+  border-left: 4px solid #d4a359;
+  border-right: 1px solid rgba(212, 163, 89, 0.2);
+  border-top: 1px solid rgba(212, 163, 89, 0.2);
+  border-bottom: 1px solid rgba(212, 163, 89, 0.2);
+  position: relative;
+}
+
+.shloka-box::before {
+  content: '॥';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: rgba(212, 163, 89, 0.3);
+  font-size: 1.5rem;
+  font-family: var(--font-devanagari);
+}
+
+/* Custom Scrollbars in Vedic Parchment */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080402;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5c4314;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 163, 89, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #966f22;
+}
+
+/* Animated Golden Yantra Pulse */
+@keyframes yantraPulse {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.04);
+    opacity: 0.28;
+  }
+}
+
+.animate-yantra-pulse {
+  animation: yantraPulse 40s linear infinite;
+}
+
+@keyframes audioWave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 18px;
+  }
+}
+
+.wave-bar-1 { animation: audioWave 1.2s ease-in-out infinite; }
+.wave-bar-2 { animation: audioWave 0.9s ease-in-out infinite 0.2s; }
+.wave-bar-3 { animation: audioWave 1.4s ease-in-out infinite 0.4s; }
+.wave-bar-4 { animation: audioWave 0.8s ease-in-out infinite 0.1s; }
+.wave-bar-5 { animation: audioWave 1.1s ease-in-out infinite 0.3s; }
