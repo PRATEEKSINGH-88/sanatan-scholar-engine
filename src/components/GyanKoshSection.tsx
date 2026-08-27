@@ -12,21 +12,20 @@ import {
   Check, 
   Volume2, 
   Sparkles, 
-  Compass, 
-  Bookmark, 
   ExternalLink,
   Info
 } from 'lucide-react';
+import { useVedicAudio } from './AudioContext';
 
 interface GyanKoshSectionProps {
   searchQuery: string;
 }
 
 export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
+  const { playMantra, isPlaying, title } = useVedicAudio();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedScripture, setSelectedScripture] = useState<ScriptureItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState<string | null>(null);
 
   const categories = [
     { id: 'all', label: 'समस्त ग्रन्थ (All Scriptures)' },
@@ -61,29 +60,13 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  const handleSpeak = (item: ScriptureItem) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert('Speech synthesis not supported in this browser.');
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    if (isPlayingAudio === item.id) {
-      setIsPlayingAudio(null);
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(item.keyShloka.sanskrit);
-    utterance.lang = 'hi-IN';
-    utterance.rate = 0.85; // Scholarly deliberate cadence
-    utterance.pitch = 0.95;
-
-    utterance.onend = () => setIsPlayingAudio(null);
-    utterance.onerror = () => setIsPlayingAudio(null);
-
-    setIsPlayingAudio(item.id);
-    window.speechSynthesis.speak(utterance);
+  const handlePlayCard = (item: ScriptureItem) => {
+    playMantra(
+      item.sanskritTitle,
+      item.keyShloka.sanskrit,
+      item.keyShloka.anvaya,
+      item.keyShloka.hindiMeaning
+    );
   };
 
   return (
@@ -100,7 +83,7 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
             ज्ञान कोष: <span className="vedic-gold-gradient">वैदिक ग्रन्थ एवं वैज्ञानिक दर्शन</span>
           </h2>
           <p className="text-sm text-[#d4a359]/80 mt-1 max-w-2xl font-sans">
-            वेदों, उपनिषदों, षड्दर्शनों एवं प्राचीन वैज्ञानिक संहिताओं के मूल संस्कृत श्लोक, अन्वय, वैज्ञानिक सहसंबंध व शोध टिप्पणियां।
+            वेदों, उपनिषदों, षड्दर्शनों एवं प्राचीन वैज्ञानिक संहिताओं के मूल संस्कृत श्लोक, अन्वय, वैज्ञानिक सहसंबंध व 0.85x शांत वाचन।
           </p>
         </div>
 
@@ -135,12 +118,14 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredScriptures.map((item) => {
             const isCopied = copiedId === item.id;
-            const isPlaying = isPlayingAudio === item.id;
+            const isCardActive = isPlaying && title === item.sanskritTitle;
 
             return (
               <div
                 key={item.id}
-                className="parchment-glass-card rounded-2xl p-6 flex flex-col justify-between relative group"
+                className={`parchment-glass-card rounded-2xl p-6 flex flex-col justify-between relative group transition-all duration-300 ${
+                  isCardActive ? 'border-2 border-[#f59e0b] shadow-[0_0_30px_rgba(245,158,11,0.25)]' : ''
+                }`}
               >
                 {/* Top Badge & Category */}
                 <div>
@@ -178,7 +163,7 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
                   {/* Anvaya (Word-by-word break) */}
                   <div className="p-3 rounded-lg bg-[#0e0704]/80 border border-[#d4a359]/15 my-2">
                     <span className="text-[11px] font-bold text-[#f59e0b] block mb-1 font-devanagari">
-                      पदच्छेद व अन्वय (Word Breakdown):
+                      पदच्छेद व अन्वय (Padachheda & Word Breakdown):
                     </span>
                     <p className="text-xs font-devanagari text-[#fef8ec]/80 leading-relaxed">
                       {item.keyShloka.anvaya}
@@ -223,43 +208,43 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
 
                 {/* Card Action Footer */}
                 <div className="flex items-center justify-between gap-2 pt-4 mt-4 border-t border-[#d4a359]/20 text-xs">
-                  <div className="text-[11px] text-[#d4a359]/60 font-mono truncate max-w-[200px]" title={item.manuscriptLocation}>
+                  <div className="text-[11px] text-[#d4a359]/60 font-mono truncate max-w-[160px]" title={item.manuscriptLocation}>
                     📍 {item.manuscriptLocation.split(',')[0]}
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {/* Audio Recitation TTS Button */}
+                    {/* Clear Card-Level Listen Button */}
                     <button
-                      onClick={() => handleSpeak(item)}
-                      title="संस्कृत श्लोक उच्चारण सुनें (Listen to Sanskrit Recitation)"
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs transition-all ${
-                        isPlaying
-                          ? 'bg-[#7c1a1a] text-white border-[#f59e0b] animate-pulse'
-                          : 'bg-[#180c07] text-[#d4a359] border-[#d4a359]/30 hover:border-[#d4a359]'
+                      onClick={() => handlePlayCard(item)}
+                      title="पूरा मन्त्र, पदच्छेद व अर्थ सुनें (0.85x Speech)"
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-devanagari font-bold text-xs transition-all border ${
+                        isCardActive
+                          ? 'bg-[#f59e0b] text-[#080402] border-[#fce0a2] shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse'
+                          : 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white border-[#d4a359] hover:brightness-110'
                       }`}
                     >
-                      <Volume2 className="w-3.5 h-3.5 text-[#f59e0b]" />
-                      <span className="font-devanagari">{isPlaying ? 'उच्चारण चालू...' : 'उच्चारण'}</span>
+                      <Volume2 className="w-4 h-4" />
+                      <span>{isCardActive ? 'वाचन चालू...' : '🔊 मन्त्र सुनें'}</span>
                     </button>
 
                     {/* Copy Button */}
                     <button
                       onClick={() => handleCopy(item)}
-                      title="श्लोक व शोध विवरण कॉपी करें (Copy Shloka & Citation)"
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs transition-all ${
+                      title="श्लोक व शोध विवरण कॉपी करें"
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs transition-all ${
                         isCopied
                           ? 'bg-emerald-900/60 text-emerald-300 border-emerald-500'
                           : 'bg-[#180c07] text-[#d4a359] border-[#d4a359]/30 hover:border-[#d4a359]'
                       }`}
                     >
                       {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span className="font-devanagari">{isCopied ? 'कॉपी किया!' : 'कॉपी'}</span>
+                      <span className="font-devanagari">{isCopied ? 'कॉपी' : 'कॉपी'}</span>
                     </button>
 
                     {/* Deep Modal Detail Button */}
                     <button
                       onClick={() => setSelectedScripture(item)}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-[#fef8ec] border border-[#d4a359]/50 hover:brightness-110 font-devanagari"
+                      className="px-3 py-1.5 rounded-xl bg-[#180c07] text-[#d4a359] border border-[#d4a359]/40 hover:text-white font-devanagari"
                     >
                       विस्तार
                     </button>
@@ -273,8 +258,8 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
 
       {/* Deep Scripture Modal */}
       {selectedScripture && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-5">
             <button
               onClick={() => setSelectedScripture(null)}
               className="absolute top-5 right-5 p-2 rounded-full bg-[#1c0e08] text-[#d4a359] hover:text-white border border-[#d4a359]/30"
@@ -340,10 +325,18 @@ export default function GyanKoshSection({ searchQuery }: GyanKoshSectionProps) {
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex items-center justify-between pt-2">
+              <button
+                onClick={() => handlePlayCard(selectedScripture)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white font-devanagari font-bold border border-[#d4a359] shadow-lg"
+              >
+                <Volume2 className="w-4 h-4" />
+                <span>🔊 यह मन्त्र सुनें</span>
+              </button>
+
               <button
                 onClick={() => setSelectedScripture(null)}
-                className="px-6 py-2.5 rounded-xl bg-[#7c1a1a] text-white font-devanagari border border-[#d4a359]"
+                className="px-6 py-2.5 rounded-xl bg-[#1c0e08] text-[#d4a359] font-devanagari border border-[#d4a359]/40 hover:text-white"
               >
                 बंद करें
               </button>

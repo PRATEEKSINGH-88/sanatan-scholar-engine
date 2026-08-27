@@ -10,7 +10,10 @@ import BhashyaTulnaSection from '@/components/BhashyaTulnaSection';
 import ManuscriptDecoderSection from '@/components/ManuscriptDecoderSection';
 import AuditLedgerSection from '@/components/AuditLedgerSection';
 import AiSanvaadSection from '@/components/AiSanvaadSection';
+import BottomFloatingPlayer from '@/components/BottomFloatingPlayer';
+import TextSelectionSpeaker from '@/components/TextSelectionSpeaker';
 import Footer from '@/components/Footer';
+import { AudioProvider } from '@/components/AudioContext';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>('gyan-kosh');
@@ -41,58 +44,66 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080402] text-[#f3ede2] selection:bg-[#7c1a1a] selection:text-[#fef8ec]">
-      
-      {/* Sticky Header Navbar with Om Drone Synthesizer */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        apiKey={apiKey}
-        setApiKey={handleUpdateApiKey}
-      />
+    <AudioProvider>
+      <div className="min-h-screen flex flex-col bg-[#080402] text-[#f3ede2] selection:bg-[#7c1a1a] selection:text-[#fef8ec] relative">
+        
+        {/* Floating Text Selection Listener */}
+        <TextSelectionSpeaker />
 
-      {/* Main Content Area */}
-      <main className="flex-1">
-        {/* Hero Banner with Stats and Quick CTAs */}
-        <HeroBanner setActiveTab={setActiveTab} />
+        {/* Sticky Header Navbar with Audio Voice Trigger */}
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          apiKey={apiKey}
+          setApiKey={handleUpdateApiKey}
+        />
 
-        {/* Dynamic Section Rendering */}
-        <div className="relative z-10 transition-opacity duration-300">
-          {activeTab === 'gyan-kosh' && (
-            <GyanKoshSection searchQuery={searchQuery} />
-          )}
+        {/* Main Content Area */}
+        <main className="flex-1 pb-24">
+          {/* Hero Banner with Stats and Quick CTAs */}
+          <HeroBanner setActiveTab={setActiveTab} />
 
-          {activeTab === 'vigyan-research' && (
-            <VigyanResearchSection searchQuery={searchQuery} />
-          )}
+          {/* Dynamic Section Rendering */}
+          <div className="relative z-10 transition-opacity duration-300">
+            {activeTab === 'gyan-kosh' && (
+              <GyanKoshSection searchQuery={searchQuery} />
+            )}
 
-          {activeTab === 'pioneers-matrix' && (
-            <ComparisonMatrixSection searchQuery={searchQuery} />
-          )}
+            {activeTab === 'vigyan-research' && (
+              <VigyanResearchSection searchQuery={searchQuery} />
+            )}
 
-          {activeTab === 'bhashya-tulna' && (
-            <BhashyaTulnaSection />
-          )}
+            {activeTab === 'pioneers-matrix' && (
+              <ComparisonMatrixSection searchQuery={searchQuery} />
+            )}
 
-          {activeTab === 'manuscript-decoder' && (
-            <ManuscriptDecoderSection />
-          )}
+            {activeTab === 'bhashya-tulna' && (
+              <BhashyaTulnaSection />
+            )}
 
-          {activeTab === 'audit-ledger' && (
-            <AuditLedgerSection />
-          )}
+            {activeTab === 'manuscript-decoder' && (
+              <ManuscriptDecoderSection />
+            )}
 
-          {activeTab === 'ai-sanvaad' && (
-            <AiSanvaadSection apiKey={apiKey} />
-          )}
-        </div>
-      </main>
+            {activeTab === 'audit-ledger' && (
+              <AuditLedgerSection />
+            )}
 
-      {/* Footer with Manifesto and Links */}
-      <Footer setActiveTab={setActiveTab} />
+            {activeTab === 'ai-sanvaad' && (
+              <AiSanvaadSection apiKey={apiKey} />
+            )}
+          </div>
+        </main>
 
-    </div>
+        {/* Clean Bottom Floating Player (Fixed at bottom-4, centered) */}
+        <BottomFloatingPlayer />
+
+        {/* Footer with Manifesto and Links */}
+        <Footer setActiveTab={setActiveTab} />
+
+      </div>
+    </AudioProvider>
   );
 }

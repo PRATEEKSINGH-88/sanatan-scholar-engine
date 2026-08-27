@@ -15,16 +15,18 @@ import {
   Clock, 
   FileCheck, 
   ChevronRight, 
-  BookOpen, 
+  Volume2, 
   ExternalLink,
   Award
 } from 'lucide-react';
+import { useVedicAudio } from './AudioContext';
 
 interface VigyanResearchSectionProps {
   searchQuery: string;
 }
 
 export default function VigyanResearchSection({ searchQuery }: VigyanResearchSectionProps) {
+  const { playMantra, isPlaying, title } = useVedicAudio();
   const [selectedModule, setSelectedModule] = useState<ScienceModule>(scienceModulesData[0]);
 
   const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -50,6 +52,16 @@ export default function VigyanResearchSection({ searchQuery }: VigyanResearchSec
   });
 
   const ActiveIcon = iconMap[selectedModule.iconName] || Atom;
+  const isCurrentActive = isPlaying && title === selectedModule.hindiTitle;
+
+  const handlePlayModuleAudio = () => {
+    playMantra(
+      selectedModule.hindiTitle,
+      selectedModule.vedicEvidence.mantra,
+      selectedModule.vedicEvidence.padachheda,
+      `${selectedModule.vedicEvidence.meaning} ${selectedModule.vedicEvidence.scientificCorrelation}`
+    );
+  };
 
   return (
     <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,10 +154,25 @@ export default function VigyanResearchSection({ searchQuery }: VigyanResearchSec
                 </div>
               </div>
 
-              {/* Timeline Delta Badge */}
-              <div className="px-3.5 py-1.5 rounded-full bg-[#7c1a1a]/60 text-[#fce0a2] border border-[#d4a359]/40 text-xs font-mono flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-[#f59e0b]" />
-                <span>{selectedModule.timelineComparison.deltaCenturies}</span>
+              {/* Audio Listen & Timeline Delta Badge */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePlayModuleAudio}
+                  title="इस मॉड्यूल का मन्त्र, पदच्छेद व अर्थ सुनें (0.85x Speech)"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-devanagari font-bold text-xs transition-all border ${
+                    isCurrentActive
+                      ? 'bg-[#f59e0b] text-[#080402] border-[#fce0a2] shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse'
+                      : 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white border-[#d4a359] hover:brightness-110'
+                  }`}
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>{isCurrentActive ? 'वाचन चालू...' : '🔊 मन्त्र सुनें'}</span>
+                </button>
+
+                <div className="px-3.5 py-1.5 rounded-full bg-[#7c1a1a]/60 text-[#fce0a2] border border-[#d4a359]/40 text-xs font-mono flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#f59e0b]" />
+                  <span>{selectedModule.timelineComparison.deltaCenturies}</span>
+                </div>
               </div>
             </div>
 
@@ -186,17 +213,43 @@ export default function VigyanResearchSection({ searchQuery }: VigyanResearchSec
               </p>
             </div>
 
-            {/* Shloka / Vedic Proof Box */}
-            <div className="shloka-box rounded-2xl p-5 mb-6">
-              <div className="text-[11px] font-mono text-[#f59e0b] uppercase tracking-widest mb-1.5">
-                प्रामाणिक वैदिक मन्त्र साक्ष्य ({selectedModule.vedicEvidence.source}):
+            {/* Shloka / Vedic Proof Box with Padachheda */}
+            <div className="shloka-box rounded-2xl p-5 mb-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-[#f59e0b] uppercase tracking-widest">
+                  प्रामाणिक वैदिक मन्त्र साक्ष्य ({selectedModule.vedicEvidence.source}):
+                </span>
+                <button
+                  onClick={handlePlayModuleAudio}
+                  className="text-xs text-[#f59e0b] hover:text-white flex items-center gap-1 font-devanagari"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>सुनें</span>
+                </button>
               </div>
+
               <p className="text-base sm:text-lg font-devanagari text-[#fce0a2] font-semibold leading-relaxed">
                 {selectedModule.vedicEvidence.mantra}
               </p>
-              <p className="text-xs font-devanagari text-[#fef8ec]/80 mt-2 pt-2 border-t border-[#d4a359]/20">
+
+              {selectedModule.vedicEvidence.padachheda && (
+                <div className="p-2.5 rounded-lg bg-[#0e0704]/90 border border-[#d4a359]/20 text-xs font-devanagari text-[#fef8ec]/90">
+                  <strong className="text-[#f59e0b]">पदच्छेद व अन्वय: </strong>
+                  {selectedModule.vedicEvidence.padachheda}
+                </div>
+              )}
+
+              <p className="text-xs font-devanagari text-[#fef8ec]/85 pt-1">
+                <strong className="text-[#d4a359]">भावार्थ: </strong>
                 {selectedModule.vedicEvidence.meaning}
               </p>
+
+              {selectedModule.vedicEvidence.scientificCorrelation && (
+                <p className="text-xs font-sans text-[#38bdf8] pt-1">
+                  <strong>Scientific Link: </strong>
+                  {selectedModule.vedicEvidence.scientificCorrelation}
+                </p>
+              )}
             </div>
 
             {/* Timeline Comparator */}

@@ -8,21 +8,20 @@ import {
 import { 
   Sparkles, 
   Quote, 
-  BookOpen, 
-  ExternalLink, 
-  Search, 
-  Tag, 
-  Layers, 
-  Atom, 
   Building2,
-  ChevronRight
+  ChevronRight,
+  Volume2,
+  FileCheck,
+  BookOpen
 } from 'lucide-react';
+import { useVedicAudio } from './AudioContext';
 
 interface ComparisonMatrixSectionProps {
   searchQuery: string;
 }
 
 export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatrixSectionProps) {
+  const { playMantra, isPlaying, title } = useVedicAudio();
   const [selectedPioneer, setSelectedPioneer] = useState<PioneerProfile | null>(null);
   const [selectedTag, setSelectedTag] = useState<string>('all');
 
@@ -51,6 +50,16 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
     });
   }, [selectedTag, searchQuery]);
 
+  const handlePlayPioneer = (p: PioneerProfile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    playMantra(
+      p.hindiName,
+      p.vedicReferenceMantra.text,
+      p.vedicReferenceMantra.padachheda,
+      `${p.vedicReferenceMantra.translation} वैज्ञानिक समीक्षा: ${p.vedicReferenceMantra.scientificMeaning}`
+    );
+  };
+
   return (
     <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
@@ -58,19 +67,19 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
       <div className="mb-8 pb-6 border-b border-[#d4a359]/20">
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#f59e0b] font-cinzel font-semibold mb-1">
           <Sparkles className="w-4 h-4" />
-          <span>Section III • Global Pioneer & Institution Matrix</span>
+          <span>Section III • Complete 12+ Pioneer & Institution Master Matrix</span>
         </div>
         <h2 className="text-2xl sm:text-4xl font-bold font-devanagari text-white">
-          शोध तुलना मैट्रिक्स: <span className="vedic-gold-gradient">वैश्विक वैज्ञानिक एवं वैदिक दर्शन</span>
+          शोध तुलना मैट्रिक्स: <span className="vedic-gold-gradient">१२+ वैश्विक वैज्ञानिक एवं वैदिक दर्शन</span>
         </h2>
         <p className="text-sm text-[#d4a359]/80 mt-1 max-w-3xl font-sans">
-          निकोला टेस्ला, नासा (रिक ब्रिग्स), इरविन श्रॉडिंगर, वर्नर हाइजेनबर्ग, ओपेनहाइमर, कार्ल सागन, CERN, रामानुजन एवं जे.सी. बोस के मन्त्र, रिसर्च पेपर्स व ऐतिहासिक उद्धरण।
+          निकोला टेस्ला, नासा (रिक ब्रिग्स), श्रॉडिंगर, हाइजेनबर्ग, ओपेनहाइमर, कार्ल सागन, CERN, रामानुजन, जे.सी. बोस, आइंस्टीन-बोस, डेविड बोम एवं नील्स बोर के मन्त्र, पदच्छेद, वैज्ञानिक भावार्थ व शोधपत्र।
         </p>
 
         {/* Filter Tags */}
         <div className="flex items-center gap-1.5 flex-wrap mt-4">
           <span className="text-xs text-[#d4a359]/60 font-mono mr-1">Tags:</span>
-          {allTags.slice(0, 8).map((t) => (
+          {allTags.slice(0, 10).map((t) => (
             <button
               key={t}
               onClick={() => setSelectedTag(t)}
@@ -86,83 +95,112 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
         </div>
       </div>
 
-      {/* Pioneer Cards Grid */}
+      {/* Pioneer Cards Grid (All 12+) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPioneers.map((pioneer) => (
-          <div
-            key={pioneer.id}
-            className="parchment-glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer"
-            onClick={() => setSelectedPioneer(pioneer)}
-          >
-            <div>
-              {/* Card Header & Era */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div>
-                  <h3 className="text-lg font-bold font-devanagari text-white group-hover:text-[#f59e0b] transition-colors">
-                    {pioneer.hindiName}
-                  </h3>
-                  <div className="text-xs text-[#d4a359] font-cinzel">
-                    {pioneer.name}
+        {filteredPioneers.map((pioneer) => {
+          const isCardActive = isPlaying && title === pioneer.hindiName;
+
+          return (
+            <div
+              key={pioneer.id}
+              className={`parchment-glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer transition-all duration-300 ${
+                isCardActive ? 'border-2 border-[#f59e0b] shadow-[0_0_30px_rgba(245,158,11,0.25)]' : ''
+              }`}
+              onClick={() => setSelectedPioneer(pioneer)}
+            >
+              <div>
+                {/* Card Header & Era */}
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold font-devanagari text-white group-hover:text-[#f59e0b] transition-colors">
+                      {pioneer.hindiName}
+                    </h3>
+                    <div className="text-xs text-[#d4a359] font-cinzel">
+                      {pioneer.name}
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#7c1a1a]/40 text-[#fce0a2] border border-[#d4a359]/30">
+                    {pioneer.era.split('(')[0].trim()}
+                  </span>
+                </div>
+
+                {/* Institution & Field */}
+                <div className="flex items-center gap-1.5 text-xs text-[#d4a359]/80 font-sans mb-3">
+                  <Building2 className="w-3.5 h-3.5 text-[#f59e0b] shrink-0" />
+                  <span className="truncate">{pioneer.institution}</span>
+                </div>
+
+                {/* Vedic Concept vs Core Discovery Pill */}
+                <div className="space-y-2 mb-3">
+                  <div className="p-2.5 rounded-xl bg-[#0e0704]/80 border border-[#d4a359]/20 text-xs">
+                    <span className="text-[10px] font-mono text-[#f59e0b] block uppercase tracking-wider">
+                      🕉️ वैदिक दार्शनिक तत्त्व:
+                    </span>
+                    <span className="font-devanagari text-white font-semibold">
+                      {pioneer.vedicConcept}
+                    </span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#0e0704]/80 border border-[#38bdf8]/20 text-xs">
+                    <span className="text-[10px] font-mono text-[#38bdf8] block uppercase tracking-wider">
+                      🔬 आधुनिक शोध योगदान:
+                    </span>
+                    <span className="font-sans text-white font-medium">
+                      {pioneer.coreDiscovery}
+                    </span>
                   </div>
                 </div>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#7c1a1a]/40 text-[#fce0a2] border border-[#d4a359]/30">
-                  {pioneer.era.split('(')[0]}
+
+                {/* Sanskrit Mantra & Padachheda Preview Box */}
+                <div className="shloka-box rounded-xl p-3 my-3 space-y-1.5">
+                  <div className="text-[10px] font-mono text-[#f59e0b] uppercase tracking-wider">
+                    📜 {pioneer.vedicReferenceMantra.source}
+                  </div>
+                  <p className="text-xs font-devanagari text-[#fce0a2] font-semibold leading-relaxed line-clamp-2">
+                    {pioneer.vedicReferenceMantra.text}
+                  </p>
+                  <p className="text-[11px] font-devanagari text-[#fef8ec]/75 pt-1 border-t border-[#d4a359]/15">
+                    <strong className="text-[#38bdf8]">पदच्छेद: </strong>
+                    {pioneer.vedicReferenceMantra.padachheda}
+                  </p>
+                </div>
+
+                {/* Published Paper Citation */}
+                <div className="p-2.5 rounded-xl bg-[#140a06] border border-[#d4a359]/20 text-[11px] text-[#fef8ec]/80 font-mono mb-3">
+                  <strong className="text-[#f59e0b]">📄 मूल पेपर/पुस्तक: </strong>
+                  <span className="truncate block">{pioneer.paperOrBookCitation}</span>
+                </div>
+              </div>
+
+              {/* Card Footer with prominent Listen Button */}
+              <div className="pt-3 border-t border-[#d4a359]/20 flex items-center justify-between gap-2 text-xs">
+                <button
+                  onClick={(e) => handlePlayPioneer(pioneer, e)}
+                  title="मन्त्र, पदच्छेद व अर्थ सुनें (0.85x Speech)"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-devanagari font-bold text-xs transition-all border ${
+                    isCardActive
+                      ? 'bg-[#f59e0b] text-[#080402] border-[#fce0a2] shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse'
+                      : 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white border-[#d4a359] hover:brightness-110'
+                  }`}
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>{isCardActive ? 'वाचन चालू...' : '🔊 मन्त्र सुनें'}</span>
+                </button>
+
+                <span className="text-[11px] text-[#f59e0b] font-devanagari flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>विस्तार</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
-
-              {/* Institution & Field */}
-              <div className="flex items-center gap-1.5 text-xs text-[#d4a359]/80 font-sans mb-3">
-                <Building2 className="w-3.5 h-3.5 text-[#f59e0b] shrink-0" />
-                <span className="truncate">{pioneer.institution}</span>
-              </div>
-
-              {/* Vedic Concept vs Core Discovery Pill */}
-              <div className="space-y-2 mb-4">
-                <div className="p-2.5 rounded-xl bg-[#0e0704]/80 border border-[#d4a359]/20 text-xs">
-                  <span className="text-[10px] font-mono text-[#f59e0b] block uppercase tracking-wider">
-                    🕉️ वैदिक दार्शनिक तत्त्व (Vedic Concept):
-                  </span>
-                  <span className="font-devanagari text-white font-semibold">
-                    {pioneer.vedicConcept}
-                  </span>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-[#0e0704]/80 border border-[#38bdf8]/20 text-xs">
-                  <span className="text-[10px] font-mono text-[#38bdf8] block uppercase tracking-wider">
-                    🔬 आधुनिक शोध योगदान (Core Discovery):
-                  </span>
-                  <span className="font-sans text-white font-medium">
-                    {pioneer.coreDiscovery}
-                  </span>
-                </div>
-              </div>
-
-              {/* Direct Historical Quote Excerpt */}
-              <div className="p-3 rounded-xl bg-[#1c0e08]/90 border-l-2 border-[#f59e0b] text-xs font-serif italic text-[#fef8ec]/90 leading-relaxed mb-4">
-                <Quote className="w-3.5 h-3.5 text-[#f59e0b] inline mr-1" />
-                <span>"{pioneer.directQuote.slice(0, 140)}..."</span>
-              </div>
             </div>
-
-            {/* Card Footer */}
-            <div className="pt-4 border-t border-[#d4a359]/20 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-[#f59e0b] font-devanagari flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                <span>विस्तृत शोध व मन्त्र साक्ष्य</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </span>
-
-              <span className="text-[10px] text-[#d4a359]/60 font-mono">
-                {pioneer.tags[0]}
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Deep Pioneer Dossier Modal */}
+      {/* Deep Pioneer Dossier Modal (Fixed clipping with z-[60] and clean scroll) */}
       {selectedPioneer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-3xl my-8 p-6 sm:p-8 rounded-3xl bg-[#120905] border-2 border-[#d4a359] shadow-2xl space-y-6">
             <button
               onClick={() => setSelectedPioneer(null)}
               className="absolute top-5 right-5 p-2 rounded-full bg-[#1c0e08] text-[#d4a359] hover:text-white border border-[#d4a359]/30"
@@ -201,16 +239,38 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
               </p>
             </div>
 
-            {/* Vedic Reference Mantra Box */}
-            <div className="shloka-box rounded-2xl p-5">
-              <div className="text-xs font-mono text-[#f59e0b] uppercase tracking-widest mb-1">
-                प्रामाणिक मन्त्र सन्दर्भ ({selectedPioneer.vedicReferenceMantra.source}):
+            {/* Vedic Reference Mantra Box with Padachheda & Meaning */}
+            <div className="shloka-box rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-[#f59e0b] uppercase tracking-widest">
+                  प्रामाणिक मन्त्र सन्दर्भ ({selectedPioneer.vedicReferenceMantra.source}):
+                </span>
+                <button
+                  onClick={(e) => handlePlayPioneer(selectedPioneer, e)}
+                  className="text-xs text-[#f59e0b] hover:text-white flex items-center gap-1 font-devanagari font-bold"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>🔊 मन्त्र सुनें</span>
+                </button>
               </div>
+
               <p className="text-base sm:text-lg font-devanagari text-[#fce0a2] font-semibold leading-relaxed">
                 {selectedPioneer.vedicReferenceMantra.text}
               </p>
-              <p className="text-xs font-sans text-[#fef8ec]/85 mt-2 pt-2 border-t border-[#d4a359]/20">
-                <strong>Translation: </strong> {selectedPioneer.vedicReferenceMantra.translation}
+
+              <div className="p-3 rounded-xl bg-[#0e0704]/90 border border-[#d4a359]/20 text-xs font-devanagari text-[#fef8ec]">
+                <strong className="text-[#f59e0b]">पदच्छेद व अन्वय: </strong>
+                {selectedPioneer.vedicReferenceMantra.padachheda}
+              </div>
+
+              <p className="text-xs font-devanagari text-[#fef8ec]/90 pt-1">
+                <strong className="text-[#d4a359]">अनुवाद: </strong>
+                {selectedPioneer.vedicReferenceMantra.translation}
+              </p>
+
+              <p className="text-xs font-sans text-[#38bdf8] pt-1">
+                <strong>Scientific Link: </strong>
+                {selectedPioneer.vedicReferenceMantra.scientificMeaning}
               </p>
             </div>
 
@@ -227,9 +287,9 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
 
               <div className="p-4 rounded-xl bg-[#1c0e08] border border-[#d4a359]/20 text-xs">
                 <h5 className="font-bold text-[#f59e0b] font-mono mb-1 uppercase">
-                  📚 प्राथमिक शोधपत्र / पुस्तक उद्धरण:
+                  📚 मूल प्रकाशित शोधपत्र / पुस्तक उद्धरण:
                 </h5>
-                <p className="text-[#fef8ec]/80 font-mono leading-relaxed">
+                <p className="text-[#fef8ec]/90 font-mono leading-relaxed">
                   {selectedPioneer.paperOrBookCitation}
                 </p>
               </div>
@@ -237,17 +297,17 @@ export default function ComparisonMatrixSection({ searchQuery }: ComparisonMatri
 
             {/* Modal Actions */}
             <div className="flex items-center justify-between pt-2 border-t border-[#d4a359]/20">
-              <div className="flex gap-1.5 flex-wrap">
-                {selectedPioneer.tags.map((t) => (
-                  <span key={t} className="text-[10px] font-mono text-[#d4a359]/70 bg-[#0e0704] px-2 py-0.5 rounded border border-[#d4a359]/20">
-                    #{t}
-                  </span>
-                ))}
-              </div>
+              <button
+                onClick={(e) => handlePlayPioneer(selectedPioneer, e)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white font-devanagari font-bold border border-[#d4a359] shadow-lg"
+              >
+                <Volume2 className="w-4 h-4" />
+                <span>🔊 यह मन्त्र सुनें</span>
+              </button>
 
               <button
                 onClick={() => setSelectedPioneer(null)}
-                className="px-6 py-2 rounded-xl bg-[#7c1a1a] text-white font-devanagari border border-[#d4a359]"
+                className="px-6 py-2 rounded-xl bg-[#1c0e08] text-[#d4a359] font-devanagari border border-[#d4a359]/40 hover:text-white"
               >
                 बंद करें
               </button>

@@ -17,7 +17,7 @@ import {
   X,
   Key
 } from 'lucide-react';
-import { omDrone } from './AudioSynthesizer';
+import { useVedicAudio } from './AudioContext';
 
 export type NavTab = 
   | 'gyan-kosh' 
@@ -45,14 +45,25 @@ export default function Navbar({
   apiKey,
   setApiKey
 }: NavbarProps) {
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const { isPlaying, isPaused, playMantra, pause, resume, stop } = useVedicAudio();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [tempKey, setTempKey] = useState(apiKey);
 
-  const toggleAudio = () => {
-    const running = omDrone.toggle();
-    setIsAudioPlaying(running);
+  const toggleHeaderAudio = () => {
+    if (isPlaying) {
+      pause();
+    } else if (isPaused) {
+      resume();
+    } else {
+      // Play Introductory Rigvedic Invocation
+      playMantra(
+        'ऋग्वेद मंगलाचरण एवं गायत्री मन्त्र',
+        'ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात् ॥',
+        'ॐ भूः भुवः स्वः तत् सवितुः वरेण्यम् भर्गः देवस्य धीमहि धियः यः नः प्रचोदयात्',
+        'हम उस प्राणस्वरूप, दुःखनाशक, सुखस्वरूप, श्रेष्ठ, तेजस्वी, पापनाशक, देवस्वरूप परमात्मा को अपने अन्तःकरण में धारण करें, जो हमारी बुद्धि को सन्मार्ग में प्रेरित करे।'
+      );
+    }
   };
 
   useEffect(() => {
@@ -62,7 +73,7 @@ export default function Navbar({
   const navItems: { id: NavTab; label: string; hindiLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'gyan-kosh', label: 'Knowledge Base', hindiLabel: 'ज्ञान कोष', icon: BookOpen },
     { id: 'vigyan-research', label: 'Science & Research', hindiLabel: 'विज्ञान व शोध', icon: Atom },
-    { id: 'pioneers-matrix', label: 'Pioneers Matrix', hindiLabel: 'शोध तुलना मैट्रिक्स', icon: Sparkles },
+    { id: 'pioneers-matrix', label: 'Pioneers Matrix (12+)', hindiLabel: 'शोध तुलना मैट्रिक्स', icon: Sparkles },
     { id: 'bhashya-tulna', label: 'Bhashya Hermeneutics', hindiLabel: 'भाष्य तुलना', icon: Layers },
     { id: 'manuscript-decoder', label: 'Manuscript Decoder', hindiLabel: 'पांडुलिपि डिकोडर', icon: FileText },
     { id: 'audit-ledger', label: 'Research Ledger', hindiLabel: 'दैनिक ऑडिट बहीखाता', icon: ClipboardList },
@@ -89,7 +100,7 @@ export default function Navbar({
                   सनातन ज्ञान-कोष
                 </span>
                 <span className="text-xs px-1.5 py-0.5 rounded bg-[#7c1a1a]/80 text-[#fef3c7] font-mono border border-[#d4a359]/30">
-                  v2.6
+                  v2.8
                 </span>
               </div>
               <span className="text-xs text-[#d4a359]/80 font-cinzel tracking-wider uppercase">
@@ -104,7 +115,7 @@ export default function Navbar({
               <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#d4a359]/60" />
               <input
                 type="text"
-                placeholder="खोजें (e.g. नासदीय, Tesla, Schrödinger, कणाद)..."
+                placeholder="खोजें (e.g. नासदीय, Tesla, Einstein, Schrödinger)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-1.5 text-sm bg-[#180c07] border border-[#d4a359]/30 rounded-full text-[#fef8ec] placeholder-[#d4a359]/50 focus:outline-none focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] transition-all"
@@ -120,35 +131,23 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Quick Actions (Audio Drone, Settings, Mobile Menu Toggle) */}
+          {/* Quick Actions (Mantra Speech Audio, Settings, Mobile Menu Toggle) */}
           <div className="flex items-center gap-2 sm:gap-3">
             
-            {/* Ambient Om Sound Synthesizer */}
+            {/* Real Mantra Speech Synthesizer Toggle */}
             <button
-              onClick={toggleAudio}
-              title={isAudioPlaying ? "ॐ नाद बंद करें (Mute 136.1Hz Om Drone)" : "ॐ नाद प्रारंभ करें (Play 136.1Hz Cosmic Om Drone)"}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-devanagari transition-all border ${
-                isAudioPlaying
+              onClick={toggleHeaderAudio}
+              title={isPlaying ? "वाचन रोकें (Pause Speech)" : "मंगलाचरण मन्त्र वाचन सुनें (Listen to Vedic Recitation)"}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-devanagari transition-all border ${
+                isPlaying
                   ? 'bg-[#7c1a1a] text-[#fef8ec] border-[#f59e0b] shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse'
                   : 'bg-[#180c07] text-[#d4a359] border-[#d4a359]/30 hover:border-[#d4a359]'
               }`}
             >
-              {isAudioPlaying ? (
-                <>
-                  <Volume2 className="w-4 h-4 text-[#f59e0b]" />
-                  <span className="hidden sm:inline font-medium">ॐ नाद चालू</span>
-                  <div className="flex items-center gap-0.5 ml-1">
-                    <span className="w-1 bg-[#f59e0b] rounded-full wave-bar-1"></span>
-                    <span className="w-1 bg-[#f59e0b] rounded-full wave-bar-2"></span>
-                    <span className="w-1 bg-[#f59e0b] rounded-full wave-bar-3"></span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <VolumeX className="w-4 h-4 text-[#d4a359]/70" />
-                  <span className="hidden sm:inline">ॐ नाद (136.1Hz)</span>
-                </>
-              )}
+              <Volume2 className={`w-4 h-4 ${isPlaying ? 'text-[#f59e0b]' : 'text-[#d4a359]/70'}`} />
+              <span className="hidden sm:inline font-medium">
+                {isPlaying ? 'मन्त्र वाचन चालू (0.85x)' : 'मंगलाचरण सुनें'}
+              </span>
             </button>
 
             {/* Settings Modal Button */}
@@ -263,7 +262,7 @@ export default function Navbar({
                   शोध इंजन सेटिंग्स (Settings)
                 </h3>
                 <p className="text-xs text-[#d4a359]/70 font-sans">
-                  Configure Custom Gemini API Key & Audio Parameters
+                  Configure Custom Gemini API Key & Audio Engine
                 </p>
               </div>
             </div>
@@ -281,17 +280,17 @@ export default function Navbar({
                   className="w-full px-3 py-2 text-xs bg-[#080402] border border-[#d4a359]/40 rounded-lg text-white focus:outline-none focus:border-[#f59e0b]"
                 />
                 <p className="text-[11px] text-[#d4a359]/60 mt-1">
-                  यदि आप अपनी Gemini API Key डालते हैं, तो AI संवाद सीधे Google Gemini मॉडल से लाइव उत्तर देगा। अन्यथा यह आंतरिक वैदिक स्कॉलर इंजन का उपयोग करेगा।
+                  यदि आप अपनी Gemini API Key डालते हैं, तो AI संवाद सीधे Google Gemini मॉडल से लाइव उत्तर देगा।
                 </p>
               </div>
 
               <div className="p-3 rounded-lg bg-[#26130b]/60 border border-[#d4a359]/20 text-xs text-[#fce0a2]/90 space-y-1">
                 <div className="font-bold flex items-center gap-1.5 text-[#f59e0b]">
-                  <span>⚡ वैदिक नाद पैरामीटर्स:</span>
+                  <span>⚡ वैदिक वाचन पैरामीटर्स:</span>
                 </div>
-                <div>• मूल आवृत्ति: 136.1 Hz (Cosmic OM)</div>
-                <div>• समकालिक हार्मोनिक्स: 272.2 Hz, 408.3 Hz & 432 Hz</div>
-                <div>• ऑडियो इंजन: Web Audio API Oscillator Matrix</div>
+                <div>• डिफ़ॉल्ट वाचन गति: 0.85x (शांत व स्पष्ट उच्चारण)</div>
+                <div>• इंजन: Web Speech Synthesis (Full Mantra + Padachheda + Meaning)</div>
+                <div>• टेक्स्ट सेलेक्शन: स्क्रीन पर किसी भी मन्त्र को सेलेक्ट कर सीधे सुनें</div>
               </div>
             </div>
 

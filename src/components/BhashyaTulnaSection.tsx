@@ -7,18 +7,27 @@ import {
 } from '../data/vedicData';
 import { 
   Layers, 
-  BookOpen, 
-  Sparkles, 
-  Compass, 
-  Atom, 
-  Cpu, 
   Scale,
-  CheckCircle2
+  Volume2
 } from 'lucide-react';
+import { useVedicAudio } from './AudioContext';
 
 export default function BhashyaTulnaSection() {
+  const { playMantra, isPlaying, title } = useVedicAudio();
   const [selectedBhashya, setSelectedBhashya] = useState<BhashyaComparison>(bhashyaComparisonsData[0]);
   const [activeScholarTab, setActiveScholarTab] = useState<number>(0);
+
+  const isBhashyaActive = isPlaying && title === selectedBhashya.source;
+
+  const handlePlayBhashya = () => {
+    const activeCommentary = selectedBhashya.commentaries[activeScholarTab];
+    playMantra(
+      selectedBhashya.source,
+      selectedBhashya.sanskritVerse,
+      selectedBhashya.padachheda,
+      `${activeCommentary.hindiScholar} भाष्य: ${activeCommentary.perspective} वैज्ञानिक समीक्षा: ${activeCommentary.scientificSynthesis}`
+    );
+  };
 
   return (
     <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,18 +73,39 @@ export default function BhashyaTulnaSection() {
           <span className="px-3 py-1 rounded-full text-xs font-mono bg-[#7c1a1a] text-[#fce0a2] border border-[#d4a359]/30">
             {selectedBhashya.shlokaNumber}
           </span>
-          <span className="text-xs font-devanagari text-[#f59e0b] font-semibold">
-            विषय: {selectedBhashya.topic}
-          </span>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePlayBhashya}
+              title="श्लोक, पदच्छेद व चयनित भाष्य सुनें"
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-devanagari font-bold text-xs transition-all border ${
+                isBhashyaActive
+                  ? 'bg-[#f59e0b] text-[#080402] border-[#fce0a2] shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse'
+                  : 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white border-[#d4a359] hover:brightness-110'
+              }`}
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span>{isBhashyaActive ? 'वाचन चालू...' : '🔊 मन्त्र सुनें'}</span>
+            </button>
+
+            <span className="text-xs font-devanagari text-[#f59e0b] font-semibold hidden sm:inline">
+              विषय: {selectedBhashya.topic}
+            </span>
+          </div>
         </div>
 
-        <div className="shloka-box rounded-2xl p-6 my-4">
+        <div className="shloka-box rounded-2xl p-6 my-4 space-y-3">
           <p className="text-lg sm:text-2xl font-devanagari text-[#fce0a2] leading-relaxed font-bold text-center">
             {selectedBhashya.sanskritVerse}
           </p>
-          <p className="text-xs sm:text-sm font-mono text-[#d4a359]/80 italic mt-3 pt-3 border-t border-[#d4a359]/20 text-center">
+          <p className="text-xs sm:text-sm font-mono text-[#d4a359]/80 italic pt-2 border-t border-[#d4a359]/20 text-center">
             {selectedBhashya.iastVerse}
           </p>
+          {selectedBhashya.padachheda && (
+            <p className="text-xs font-devanagari text-[#fef8ec]/80 text-center bg-[#0e0704]/70 p-2 rounded-lg border border-[#d4a359]/20">
+              <strong className="text-[#38bdf8]">पदच्छेद: </strong> {selectedBhashya.padachheda}
+            </p>
+          )}
         </div>
       </div>
 
