@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   Atom, 
@@ -10,7 +10,6 @@ import {
   ClipboardList, 
   Bot, 
   Volume2, 
-  VolumeX, 
   Search, 
   Settings, 
   Menu, 
@@ -57,7 +56,6 @@ export default function Navbar({
   const [themeMode, setThemeMode] = useState<'dark' | 'parchment'>('dark');
   const [selectedLang, setSelectedLang] = useState<'hi' | 'sa' | 'en'>('hi');
   const [isSavedAlert, setIsSavedAlert] = useState(false);
-  const settingsRef = useRef<HTMLDivElement>(null);
 
   const toggleHeaderAudio = () => {
     if (isPlaying) {
@@ -79,21 +77,6 @@ export default function Navbar({
     setTempKey(apiKey);
   }, [apiKey]);
 
-  // Click outside to close settings dropdown on desktop
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
-        setIsSettingsOpen(false);
-      }
-    };
-    if (isSettingsOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSettingsOpen]);
-
   const navItems: { id: NavTab; label: string; hindiLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'gyan-kosh', label: 'Knowledge Base', hindiLabel: 'ज्ञान कोष', icon: BookOpen },
     { id: 'vigyan-research', label: 'Science & Research', hindiLabel: 'विज्ञान व शोध', icon: Atom },
@@ -114,8 +97,8 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#080402]/95 border-b border-[#d4a359]/20 shadow-2xl transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#080402]/95 border-b border-[#d4a359]/20 shadow-2xl transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
           {/* Logo & Emblem */}
@@ -164,8 +147,8 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Quick Actions (Audio Speech, Settings Icon & Dropdown, Mobile Menu) */}
-          <div className="flex items-center gap-2 sm:gap-3 relative" ref={settingsRef}>
+          {/* Quick Actions (Audio Speech, Settings Modal Toggle, Mobile Menu) */}
+          <div className="flex items-center gap-2 sm:gap-3">
             
             {/* Real Mantra Speech Synthesizer Toggle */}
             <button
@@ -183,17 +166,13 @@ export default function Navbar({
               </span>
             </button>
 
-            {/* Settings Button */}
+            {/* Settings Modal Button */}
             <button
-              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              onClick={() => setIsSettingsOpen(true)}
               title="सेटिंग्स व AI कुंजी (Settings & Configuration)"
-              className={`p-2 rounded-full border transition-all ${
-                isSettingsOpen
-                  ? 'bg-[#7c1a1a] border-[#f59e0b] text-[#fce0a2] shadow-[0_0_15px_rgba(245,158,11,0.4)]'
-                  : 'bg-[#180c07] border-[#d4a359]/30 text-[#d4a359] hover:text-[#fef8ec] hover:border-[#f59e0b]'
-              }`}
+              className="p-2 rounded-full border border-[#d4a359]/30 bg-[#180c07] text-[#d4a359] hover:text-[#fef8ec] hover:border-[#f59e0b] transition-all"
             >
-              <Settings className={`w-4 h-4 ${isSettingsOpen ? 'rotate-90 text-[#f59e0b]' : ''} transition-transform duration-300`} />
+              <Settings className="w-4 h-4" />
             </button>
 
             {/* Mobile Menu Button */}
@@ -203,182 +182,6 @@ export default function Navbar({
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-
-            {/* SETTINGS POP-UP / DROPDOWN (Cleanly positioned, never clips on top) */}
-            {isSettingsOpen && (
-              <div 
-                className="absolute right-0 top-full mt-2.5 w-84 sm:w-96 max-w-[92vw] z-50 rounded-2xl bg-gradient-to-b from-[#1c0e08] via-[#140a06] to-[#0e0704] border-2 border-[#d4a359] shadow-[0_15px_50px_rgba(0,0,0,0.9)] p-5 text-white animate-in fade-in zoom-in-95 duration-200"
-                style={{ maxHeight: '85vh', overflowY: 'auto' }}
-              >
-                
-                {/* Header with Clear Close '✕' Button */}
-                <div className="flex items-center justify-between pb-3 border-b border-[#d4a359]/30 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-[#7c1a1a] text-[#f59e0b] border border-[#d4a359]/40">
-                      <Settings className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold font-devanagari text-[#fce0a2]">
-                        शोध इंजन सेटिंग्स (Settings)
-                      </h3>
-                      <p className="text-[10px] text-[#d4a359]/70 font-sans">
-                        Theme, Audio Speed & Gemini API
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setIsSettingsOpen(false)}
-                    title="बंद करें (Close)"
-                    className="p-1.5 rounded-lg bg-[#080402] border border-[#d4a359]/40 text-[#d4a359] hover:text-white hover:border-[#f59e0b] transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="space-y-4 text-xs">
-                  
-                  {/* Option 1: Theme Selector */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                      <Moon className="w-3.5 h-3.5" />
-                      <span>१. दृश्य थीम (Visual Theme):</span>
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setThemeMode('dark')}
-                        className={`px-3 py-2 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
-                          themeMode === 'dark'
-                            ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
-                            : 'bg-[#080402] text-[#d4a359]/70 border-[#d4a359]/30 hover:border-[#d4a359]'
-                        }`}
-                      >
-                        <Moon className="w-3.5 h-3.5" />
-                        <span>कॉस्मिक डार्क (Dark)</span>
-                      </button>
-
-                      <button
-                        onClick={() => setThemeMode('parchment')}
-                        className={`px-3 py-2 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
-                          themeMode === 'parchment'
-                            ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
-                            : 'bg-[#080402] text-[#d4a359]/70 border-[#d4a359]/30 hover:border-[#d4a359]'
-                        }`}
-                      >
-                        <Sun className="w-3.5 h-3.5" />
-                        <span>पार्चमेंट गोल्ड (Light)</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Option 2: Audio Speed Selector */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                      <Gauge className="w-3.5 h-3.5" />
-                      <span>२. मन्त्र वाचन गति (Audio Speed):</span>
-                    </label>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {[
-                        { label: '0.75x', val: 0.75 },
-                        { label: '0.85x', val: 0.85, sub: 'शांत' },
-                        { label: '1.0x', val: 1.0 },
-                        { label: '1.25x', val: 1.25 }
-                      ].map((item) => (
-                        <button
-                          key={item.val}
-                          onClick={() => setSpeed(item.val)}
-                          className={`py-1.5 rounded-lg text-xs font-mono transition-all border text-center ${
-                            speed === item.val
-                              ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b] shadow-sm'
-                              : 'bg-[#080402] text-[#d4a359]/70 border-[#d4a359]/30 hover:text-white'
-                          }`}
-                        >
-                          <div>{item.label}</div>
-                          {item.sub && <div className="text-[9px] text-[#fce0a2]">{item.sub}</div>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Option 3: Language Preference */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                      <Languages className="w-3.5 h-3.5" />
-                      <span>३. प्राथमिक भाषा (Language Preference):</span>
-                    </label>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[
-                        { id: 'hi', label: 'हिन्दी' },
-                        { id: 'sa', label: 'संस्कृतम्' },
-                        { id: 'en', label: 'English (IAST)' }
-                      ].map((lang) => (
-                        <button
-                          key={lang.id}
-                          onClick={() => setSelectedLang(lang.id as 'hi' | 'sa' | 'en')}
-                          className={`py-1.5 rounded-lg text-xs font-devanagari transition-all border text-center ${
-                            selectedLang === lang.id
-                              ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b]'
-                              : 'bg-[#080402] text-[#d4a359]/70 border-[#d4a359]/30 hover:text-white'
-                          }`}
-                        >
-                          {lang.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Option 4: Custom Gemini API Key */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                      <Key className="w-3.5 h-3.5" />
-                      <span>४. Google Gemini API Key (Optional):</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={tempKey}
-                      onChange={(e) => setTempKey(e.target.value)}
-                      placeholder="AIzaSy..."
-                      className="w-full px-3 py-2 text-xs bg-[#080402] border border-[#d4a359]/40 rounded-xl text-white placeholder-[#d4a359]/40 focus:outline-none focus:border-[#f59e0b]"
-                    />
-                    <p className="text-[10px] text-[#d4a359]/70 mt-1">
-                      कस्टम की डालने पर AI संवाद लाइव Google Gemini मॉडल से चलेगा।
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* Footer Buttons */}
-                <div className="flex items-center justify-between gap-2 mt-5 pt-3 border-t border-[#d4a359]/20">
-                  <button
-                    onClick={() => {
-                      setTempKey('');
-                      setApiKey('');
-                    }}
-                    className="text-[11px] text-[#d4a359]/70 hover:text-rose-300 font-devanagari"
-                  >
-                    कुंजी हटाएं
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsSettingsOpen(false)}
-                      className="px-3 py-1.5 text-xs text-[#d4a359] hover:text-white font-devanagari"
-                    >
-                      रद्द करें
-                    </button>
-
-                    <button
-                      onClick={handleSaveSettings}
-                      className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold font-devanagari bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white rounded-xl border border-[#d4a359] hover:brightness-110 shadow-lg"
-                    >
-                      {isSavedAlert ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : null}
-                      <span>{isSavedAlert ? 'सेव हो गया!' : 'सेव करें (Save)'}</span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )}
 
           </div>
         </div>
@@ -456,6 +259,188 @@ export default function Navbar({
           </div>
         </div>
       )}
+
+      {/* FULLY SCREEN-CENTERED SETTINGS MODAL DIALOG WITH BACKDROP */}
+      {isSettingsOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setIsSettingsOpen(false)}
+        >
+          <div 
+            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-amber-500/30 bg-[#1a120b] text-amber-100 p-6 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            
+            {/* Header: ⚙️ सिस्टम व AI सेटिंग्स with Clear Close Button */}
+            <div className="flex items-center justify-between pb-3 border-b border-amber-500/20 mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#7c1a1a] text-[#f59e0b] border border-amber-500/30 shadow-md">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold font-devanagari text-[#fce0a2]">
+                    ⚙️ सिस्टम व AI सेटिंग्स
+                  </h3>
+                  <p className="text-xs text-amber-300/70 font-sans">
+                    System Preferences, Speech Engine & Gemini AI
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                title="बंद करें (Close)"
+                className="p-2 rounded-xl bg-[#0e0704] border border-amber-500/30 text-amber-200 hover:text-white hover:border-[#f59e0b] transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              
+              {/* 1. Theme Selector */}
+              <div>
+                <label className="block text-xs font-mono text-[#f59e0b] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <Moon className="w-4 h-4" />
+                  <span>१. दृश्य थीम (Visual Theme):</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => setThemeMode('dark')}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
+                      themeMode === 'dark'
+                        ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
+                        : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:border-amber-500/50'
+                    }`}
+                  >
+                    <Moon className="w-3.5 h-3.5" />
+                    <span>कॉस्मिक डार्क (Dark)</span>
+                  </button>
+
+                  <button
+                    onClick={() => setThemeMode('parchment')}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
+                      themeMode === 'parchment'
+                        ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
+                        : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:border-amber-500/50'
+                    }`}
+                  >
+                    <Sun className="w-3.5 h-3.5" />
+                    <span>पार्चमेंट गोल्ड (Light)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. Audio Speed Selector */}
+              <div>
+                <label className="block text-xs font-mono text-[#f59e0b] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <Gauge className="w-4 h-4" />
+                  <span>२. मन्त्र वाचन गति (Audio Speed):</span>
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { label: '0.75x', val: 0.75 },
+                    { label: '0.85x', val: 0.85, sub: 'शांत' },
+                    { label: '1.0x', val: 1.0 },
+                    { label: '1.25x', val: 1.25 }
+                  ].map((item) => (
+                    <button
+                      key={item.val}
+                      onClick={() => setSpeed(item.val)}
+                      className={`py-2 rounded-xl text-xs font-mono transition-all border text-center ${
+                        speed === item.val
+                          ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b] shadow-sm'
+                          : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:text-white'
+                      }`}
+                    >
+                      <div className="font-bold">{item.label}</div>
+                      {item.sub && <div className="text-[10px] text-[#fce0a2]">{item.sub}</div>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Language Preference */}
+              <div>
+                <label className="block text-xs font-mono text-[#f59e0b] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <Languages className="w-4 h-4" />
+                  <span>३. प्राथमिक भाषा (Language Preference):</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'hi', label: 'हिन्दी' },
+                    { id: 'sa', label: 'संस्कृतम्' },
+                    { id: 'en', label: 'English (IAST)' }
+                  ].map((lang) => (
+                    <button
+                      key={lang.id}
+                      onClick={() => setSelectedLang(lang.id as 'hi' | 'sa' | 'en')}
+                      className={`py-2 rounded-xl text-xs font-devanagari transition-all border text-center ${
+                        selectedLang === lang.id
+                          ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b]'
+                          : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:text-white'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Custom Gemini API Key */}
+              <div>
+                <label className="block text-xs font-mono text-[#f59e0b] mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                  <Key className="w-4 h-4" />
+                  <span>४. Google Gemini API Key (Optional):</span>
+                </label>
+                <input
+                  type="password"
+                  value={tempKey}
+                  onChange={(e) => setTempKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-[#0e0704] border border-amber-500/40 rounded-xl text-white placeholder-amber-500/40 focus:outline-none focus:border-[#f59e0b]"
+                />
+                <p className="text-[11px] text-amber-300/70 mt-1">
+                  यदि आप अपनी कुंजी डालते हैं, तो AI संवाद सीधे Google Gemini मॉडल से चलेगा।
+                </p>
+              </div>
+
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-between gap-3 mt-6 pt-4 border-t border-amber-500/20">
+              <button
+                onClick={() => {
+                  setTempKey('');
+                  setApiKey('');
+                }}
+                className="text-xs text-amber-300/70 hover:text-rose-300 font-devanagari"
+              >
+                कुंजी हटाएं
+              </button>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="px-4 py-2 text-xs text-amber-200 hover:text-white font-devanagari rounded-xl bg-[#0e0704] border border-amber-500/30"
+                >
+                  रद्द करें
+                </button>
+
+                <button
+                  onClick={handleSaveSettings}
+                  className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold font-devanagari bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white rounded-xl border border-amber-400 hover:brightness-110 shadow-lg"
+                >
+                  {isSavedAlert ? <Check className="w-4 h-4 text-emerald-300" /> : null}
+                  <span>{isSavedAlert ? 'सेव हो गया!' : 'सुरक्षित करें (Save)'}</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </header>
   );
 }
