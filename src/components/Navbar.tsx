@@ -110,7 +110,7 @@ export default function Navbar({
     setTimeout(() => {
       setIsSavedAlert(false);
       setIsSettingsOpen(false);
-    }, 800);
+    }, 700);
   };
 
   return (
@@ -187,7 +187,7 @@ export default function Navbar({
             <button
               onClick={() => setIsSettingsOpen(true)}
               title="सेटिंग्स व AI कुंजी (Settings & Configuration)"
-              className="p-2 rounded-full border border-[#d4a359]/30 bg-[#180c07] text-[#d4a359] hover:text-[#fef8ec] hover:border-[#f59e0b] transition-all"
+              className="p-2 rounded-full border border-[#d4a359]/30 bg-[#180c07] text-[#d4a359] hover:text-[#fef8ec] hover:border-[#f59e0b] transition-all cursor-pointer"
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -195,7 +195,7 @@ export default function Navbar({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-[#180c07] border border-[#d4a359]/30 text-[#d4a359] hover:text-white"
+              className="lg:hidden p-2 rounded-lg bg-[#180c07] border border-[#d4a359]/30 text-[#d4a359] hover:text-white cursor-pointer"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -212,7 +212,7 @@ export default function Navbar({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-[#fef8ec] border border-[#d4a359]/60 shadow-[0_4px_14px_rgba(124,26,26,0.5)] scale-[1.02]'
                     : 'text-[#d4a359]/80 hover:text-[#fef8ec] hover:bg-[#1c0e08]/60'
@@ -255,7 +255,7 @@ export default function Navbar({
                     setActiveTab(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm font-devanagari transition-all ${
+                  className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm font-devanagari transition-all cursor-pointer ${
                     isActive
                       ? 'bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white border border-[#d4a359]'
                       : 'text-[#d4a359]/80 hover:bg-[#1c0e08]'
@@ -277,18 +277,20 @@ export default function Navbar({
         </div>
       )}
 
-      {/* FULLY SCREEN-CENTERED SETTINGS MODAL DIALOG WITH PORTAL & HIGHEST Z-INDEX */}
+      {/* FULLY SCREEN-CENTERED SETTINGS MODAL DIALOG WITH HIGHEST Z-INDEX VIA PORTAL */}
       {mounted && isSettingsOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
           onClick={() => setIsSettingsOpen(false)}
         >
           <div 
-            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-amber-500/40 bg-[#120d08] text-amber-100 p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] z-[10000] my-auto animate-in fade-in zoom-in-95 duration-200"
+            role="dialog"
+            aria-modal="true"
+            className="z-[10000] relative w-full max-w-lg rounded-2xl border border-amber-800/30 bg-[#120d08] text-amber-100 p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] my-auto max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             
-            {/* Header with Title and Close Button */}
+            {/* Header: Title and Close Button */}
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20 mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-[#7c1a1a] text-[#f59e0b] border border-amber-500/30 shadow-md">
@@ -306,8 +308,8 @@ export default function Navbar({
 
               <button
                 onClick={() => setIsSettingsOpen(false)}
-                title="बंद करें (Close)"
-                className="p-2 rounded-xl bg-[#0e0704] border border-amber-500/30 text-amber-200 hover:text-white hover:border-[#f59e0b] transition-all"
+                title="Cancel / Close"
+                className="p-2 rounded-xl bg-[#0e0704] border border-amber-500/30 text-amber-200 hover:text-white hover:border-[#f59e0b] transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -324,7 +326,7 @@ export default function Navbar({
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     onClick={() => setThemeMode('dark')}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
+                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       themeMode === 'dark'
                         ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
                         : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:border-amber-500/50'
@@ -336,7 +338,7 @@ export default function Navbar({
 
                   <button
                     onClick={() => setThemeMode('parchment')}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all ${
+                    className={`px-3 py-2.5 rounded-xl text-xs font-devanagari font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       themeMode === 'parchment'
                         ? 'bg-[#7c1a1a] text-[#fce0a2] border-[#f59e0b] shadow-md'
                         : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:border-amber-500/50'
@@ -364,7 +366,7 @@ export default function Navbar({
                     <button
                       key={item.val}
                       onClick={() => setSpeed(item.val)}
-                      className={`py-2 rounded-xl text-xs font-mono transition-all border text-center ${
+                      className={`py-2 rounded-xl text-xs font-mono transition-all border text-center cursor-pointer ${
                         speed === item.val
                           ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b] shadow-sm'
                           : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:text-white'
@@ -392,7 +394,7 @@ export default function Navbar({
                     <button
                       key={lang.id}
                       onClick={() => setSelectedLang(lang.id as 'hi' | 'sa' | 'en')}
-                      className={`py-2 rounded-xl text-xs font-devanagari transition-all border text-center ${
+                      className={`py-2 rounded-xl text-xs font-devanagari transition-all border text-center cursor-pointer ${
                         selectedLang === lang.id
                           ? 'bg-[#7c1a1a] text-white font-bold border-[#f59e0b]'
                           : 'bg-[#0e0704] text-amber-200/70 border-amber-500/20 hover:text-white'
@@ -424,14 +426,14 @@ export default function Navbar({
 
             </div>
 
-            {/* Footer Buttons */}
+            {/* Modal Footer with Clean 'Save changes' and 'Cancel' Buttons */}
             <div className="flex items-center justify-between gap-3 mt-6 pt-4 border-t border-amber-500/20">
               <button
                 onClick={() => {
                   setTempKey('');
                   setApiKey('');
                 }}
-                className="text-xs text-amber-300/70 hover:text-rose-300 font-devanagari"
+                className="text-xs text-amber-300/70 hover:text-rose-300 font-devanagari cursor-pointer"
               >
                 कुंजी हटाएं
               </button>
@@ -439,17 +441,17 @@ export default function Navbar({
               <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => setIsSettingsOpen(false)}
-                  className="px-4 py-2 text-xs text-amber-200 hover:text-white font-devanagari rounded-xl bg-[#0e0704] border border-amber-500/30"
+                  className="px-4 py-2 text-xs text-amber-200 hover:text-white font-devanagari rounded-xl bg-[#0e0704] border border-amber-500/30 hover:border-amber-500/70 cursor-pointer"
                 >
-                  रद्द करें
+                  Cancel (रद्द करें)
                 </button>
 
                 <button
                   onClick={handleSaveSettings}
-                  className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold font-devanagari bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white rounded-xl border border-amber-400 hover:brightness-110 shadow-lg"
+                  className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold font-devanagari bg-gradient-to-r from-[#7c1a1a] to-[#a33b12] text-white rounded-xl border border-amber-400 hover:brightness-110 shadow-lg cursor-pointer"
                 >
                   {isSavedAlert ? <Check className="w-4 h-4 text-emerald-300" /> : null}
-                  <span>{isSavedAlert ? 'सेव हो गया!' : 'सुरक्षित करें (Save)'}</span>
+                  <span>{isSavedAlert ? 'सेव हो गया!' : 'Save changes (सुरक्षित करें)'}</span>
                 </button>
               </div>
             </div>

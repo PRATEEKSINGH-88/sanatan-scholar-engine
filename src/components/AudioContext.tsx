@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 interface AudioState {
   isPlaying: boolean;
   isPaused: boolean;
+  isVisible: boolean;
   title: string;
   sanskrit: string;
   padachheda: string;
@@ -18,6 +19,7 @@ interface AudioContextType extends AudioState {
   pause: () => void;
   resume: () => void;
   stop: () => void;
+  closePlayer: () => void;
   setSpeed: (speed: number) => void;
 }
 
@@ -26,11 +28,12 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [sanskrit, setSanskrit] = useState('');
   const [padachheda, setPadachheda] = useState('');
   const [meaning, setMeaning] = useState('');
-  const [speed, setSpeedState] = useState(0.85); // Default 0.85x for serene, clear Sanskrit recitation
+  const [speed, setSpeedState] = useState(0.85); // Default 0.85x for serene Vedic recitation
 
   const stop = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -38,6 +41,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
     setIsPlaying(false);
     setIsPaused(false);
+  }, []);
+
+  const closePlayer = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    setIsPaused(false);
+    setIsVisible(false);
+    setTitle('');
+    setSanskrit('');
+    setPadachheda('');
+    setMeaning('');
   }, []);
 
   const pause = useCallback(() => {
@@ -50,22 +66,27 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const resume = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.resume();
-      setIsPaused(false);
-      setIsPlaying(true);
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        setIsPaused(false);
+        setIsPlaying(true);
+      } else if (sanskrit) {
+        playMantraInternal(title, sanskrit, padachheda, meaning, speed);
+      }
     }
-  }, []);
+  }, [sanskrit, title, padachheda, meaning, speed]);
 
   const setSpeed = useCallback((newSpeed: number) => {
     setSpeedState(newSpeed);
-    // If currently playing, restart with new speed seamlessly
-    if (isPlaying && sanskrit) {
-      stop();
-      setTimeout(() => {
-        playMantraInternal(title, sanskrit, padachheda, meaning, newSpeed);
-      }, 100);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      if (isPlaying && sanskrit) {
+        window.speechSynthesis.cancel();
+        setTimeout(() => {
+          playMantraInternal(title, sanskrit, padachheda, meaning, newSpeed);
+        }, 80);
+      }
     }
-  }, [isPlaying, title, sanskrit, padachheda, meaning, stop]);
+  }, [isPlaying, title, sanskrit, padachheda, meaning]);
 
   const playMantraInternal = (
     itemTitle: string,
@@ -85,6 +106,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setSanskrit(sanskritText);
     setPadachheda(padachhedaText);
     setMeaning(meaningText);
+    setIsVisible(true);
 
     // Build the complete recitation narrative
     let narration = `${itemTitle}। `;
@@ -98,10 +120,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
     const utterance = new SpeechSynthesisUtterance(narration);
     utterance.lang = 'hi-IN';
-    utterance.rate = currentSpeed; // Calm deliberate recitation
+    utterance.rate = currentSpeed;
     utterance.pitch = 0.95;
 
-    // Pick best Hindi/Indian voice if available
     const voices = window.speechSynthesis.getVoices();
     const hiVoice = voices.find(v => v.lang.includes('hi') || v.lang.includes('IN') || v.name.includes('Hindi') || v.name.includes('Indian'));
     if (hiVoice) {
@@ -111,6 +132,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     utterance.onstart = () => {
       setIsPlaying(true);
       setIsPaused(false);
+      setIsVisible(true);
     };
 
     utterance.onend = () => {
@@ -119,7 +141,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     };
 
     utterance.onerror = (e) => {
-      console.warn('Speech synthesis error:', e);
+      console.warn('Speech synthesis event notice:', e);
       setIsPlaying(false);
       setIsPaused(false);
     };
@@ -155,6 +177,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       value={{
         isPlaying,
         isPaused,
+        isVisible,
         title,
         sanskrit,
         padachheda,
@@ -165,6 +188,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         pause,
         resume,
         stop,
+        closePlayer,
         setSpeed
       }}
     >
